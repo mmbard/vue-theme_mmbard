@@ -28,6 +28,10 @@
             {{ Note }}
             <button class="btn danger" @click="removeNote(i)">Удалить</button>
           </li>
+          <hr>
+          <li>
+              <strong>Общее количество заметок: {{ notes.length }}</strong> | Удвоенное: {{ doubleCountComputed }}
+          </li>
         </ul>
         <div v-else> Заметок нет. Добавьте первую.</div>
       </div>
