@@ -11,7 +11,10 @@
 
     <div class="container" id="app">
       <div class="card">
-        <h1> {{ title }}</h1>
+        <h1 :style="{
+          color: inputValue.length < 5 ? 'darkred' : 'darkblue',
+          fontSize: inputValue.length < 6 ? '2rem' : '1.5rem'
+        }"> {{ title }}</h1>
         <div class="form-control">
           <input 
             type="text"
@@ -24,7 +27,12 @@
         <hr/>
         <ul class="list" v-if="notes.length !==0">
           <li class="list-item" v-for="(Note, i) in notes">
-            {{ Note }}
+           <!-- <span :class="Note.length > 5 ? 'primary' : 'bold'"> {{ Note }} </span> -->
+           <!-- <span :class="{
+            'primary': true,
+            'bold': Note.length > 5
+           }"> {{ Note }} </span> -->
+           <span :class="['bold', {'primary': Note.length > 5}]"> {{ Note }} </span>
             <button class="btn danger" @click="removeNote(i)">Удалить</button>
           </li>
           <hr>

@@ -8,10 +8,10 @@ const App = {
     };
   },
   methods: {
-    inputChangeHandler(event) {
-      //console.log('inputChangeHandler', event.target.value)
-      this.inputValue = event.target.value;
-    },
+    // inputChangeHandler(event) {
+    //   //console.log('inputChangeHandler', event.target.value)
+    //   this.inputValue = event.target.value;
+    // }, // без v-model
     addNewNote() {
       if (this.inputValue === '') {
         return
@@ -24,8 +24,22 @@ const App = {
     },
     removeNote(i) {
       this.notes.splice(i, 1)
+    },
+  },
+  computed: {
+    doubleCountComputed() {
+      //console.log('doubleCountCounted')
+      return this.notes.length * 2
     }
   },
+  watch: {
+    inputValue(value) {
+      if (value.length > 20) {
+        this.inputValue = ''
+      }
+      //console.log('input Value', value);
+    }
+  }
 };
 
 const app = Vue.createApp(App);
