@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+    
+    <app-alert :alert="alert" @close="alert = null"></app-alert>
     <form class="card" @submit.prevent="createPerson">
       <h2>Работа с базой данных</h2>
 
@@ -10,7 +12,11 @@
 
       <button class="btn primary" :disabled="name.length === 0">Создать человека</button>
     </form>
-    <app-people-list 
+
+    <app-loader v-if="loading"></app-loader>
+
+    <app-people-list
+      v-else 
       :people="people"
       @load="loadPeople"
       @remove="removePerson"
@@ -19,6 +25,8 @@
 </template>
 
 <script>
+import AppAlert from './components/AppAlert.vue';
+import AppLoader from './components/AppLoader.vue';
 import AppPeopleList from './components/AppPeopleList.vue';
 import axios from 'axios';
 
@@ -26,14 +34,16 @@ export default {
   data() {
     return {
       name: '',
-      people: []
+      people: [],
+      alert: null,
+      loading: false
     }
   },
   mounted() {
     this.loadPeople()
   },
   components: {
-    AppPeopleList
+    AppPeopleList, AppAlert, AppLoader
   },
   methods: {
     async createPerson() {
@@ -57,19 +67,51 @@ export default {
         id: firebaseData.name
       })
       this.name = ''
+      this.alert = null
     },
     async loadPeople() {
-      const {data}= await axios.get('https://vue-with-https-006-default-rtdb.europe-west1.firebasedatabase.app/people.json')
-      this.people = Object.keys(data).map(key => {
-        return {
-          id: key,
-          ...data[key] // firstName: data[key]
+      try {
+        this.loading = true
+
+        const { data } = await axios.get('https://vue-with-https-006-default-rtdb.europe-west1.firebasedatabase.app/people.json')
+        if (!data) {
+          throw new Error('Список людей пуст')
         }
-      })
+
+        this.people = Object.keys(data).map(key => {
+          return {
+            id: key,
+            ...data[key] // firstName: data[key]
+          }
+        })
+
+        this.loading = false
+      } catch (e) {
+        this.alert = {
+          type: 'danger',
+          title: 'Ошибка!',
+          text: e.message
+        }
+        this.loading = false
+      }
     },
     async removePerson(id) {
-      await axios.delete(`https://vue-with-https-006-default-rtdb.europe-west1.firebasedatabase.app/people/${id}.json`)
-      this.people = this.people.filter(person => person.id !== id)
+      try {
+        const name = this.people.find(person => person.id === id).firstName
+        await axios.delete(`https://vue-with-https-006-default-rtdb.europe-west1.firebasedatabase.app/people/${id}.json`)
+        this.people = this.people.filter(person => person.id !== id)
+        this.alert = {
+          type: 'primary',
+          title: 'Успешно',
+          text: `Пользователь ${name} был успешно удален.`
+        }
+      } catch(e) {
+        this.alert = {
+          type: 'danger',
+          title: 'Ошибка!',
+          text: e.message
+        }
+      }
     }
   }
 }
